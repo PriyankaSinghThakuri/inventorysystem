@@ -1,0 +1,91 @@
+﻿@page "/dashboard"
+@using BikeServiceCenter.Data
+@using System.Globalization
+@using Radzen
+@using Radzen.Blazor;
+@implements IDisposable
+
+<div class="container">
+    <div class="row">
+       <div class="col-sm-12 my-5">
+            <RadzenCard Class="w-100 mb-4">
+               <RadzenChart>
+                    <RadzenColumnSeries Data="@approveditems" CategoryProperty="ItemName" Title="Items" LineType="LineType.Dashed" ValueProperty="Quantity">
+                         <RadzenSeriesDataLabels Visible="@showDataLabels" />
+                         </RadzenColumnSeries>
+                      <RadzenColumnOptions Radius="4" />
+                      <RadzenValueAxis >
+                          <RadzenGridLines Visible="true" />
+                           <RadzenAxisTitle Text="Number Taken Out" />
+                      </RadzenValueAxis>
+               </RadzenChart>
+            </RadzenCard>
+       </div>
+    </div>
+</div>
+<div class="bottom-charts" style="display:flex; flex-direction: row;">
+     <div class="container">
+        <div class="row">
+            <div class="col">
+                 <RadzenChart>
+                    <RadzenLineSeries Smooth="true" Data="@approveditems" CategoryProperty="TakenOutDate" Title="Items Sale" ValueProperty="Quantity" RenderingOrder="1">
+                        <RadzenSeriesTrendLine Visible="@trend" Stroke="var(--rz-danger-dark)" LineType="LineType.Dashed" />
+                        <RadzenSeriesMedianLine Visible="@median" Stroke="var(--rz-success-dark)" LineType="LineType.Dotted" />
+                        <RadzenSeriesMeanLine Visible="@mean" Stroke="var(--rz-info-dark)" LineType="LineType.Dotted" />
+                        <RadzenSeriesModeLine Visible="@mode" Stroke="var(--rz-warning-darker)" LineType="LineType.Dotted" />
+                    </RadzenLineSeries>
+                    <RadzenCategoryAxis Padding="20" Formatter="@FormatAsMonth" />
+                    <RadzenValueAxis>
+                        <RadzenGridLines Visible="true" />
+                        <RadzenAxisTitle Text="Quantity" />
+                    </RadzenValueAxis>
+                </RadzenChart>
+            </div>
+        </div>
+    </div>
+<div class="container">
+    <div class="row">
+        <div class="my-3">
+            <RadzenChart>
+                <RadzenPieSeries Data="@items" Title="Inventory Items" CategoryProperty="ItemName" ValueProperty="QuantityInIntentory">
+                    <RadzenSeriesDataLabels Visible="@showDataLabels"/>
+                </RadzenPieSeries>
+            </RadzenChart>
+        </div>
+    </div>
+</div>
+</div>
+   
+
+@code{
+    [CascadingParameter]
+    private GlobalState _globalState { get; set; }
+    bool trend = true;
+    bool median = true;
+    bool mean = true;
+    bool mode = true;
+    bool showDataLabels = true;
+    List<ApprovedItem> approveditems = new List<ApprovedItem>();
+    List<ItemsData> items = new List<ItemsData>();
+
+    string FormatAsMonth(object value)
+    {
+        if (value != null)
+        {
+            return Convert.ToDateTime(value).ToString("MMM");
+        }
+
+        return string.Empty;
+    }
+
+    protected override void OnInitialized()
+    {
+        approveditems = ApprovedItemService.GetAll();
+        items = ItemsService.GetAll();
+    }
+    public void Dispose()
+    {
+        approveditems = null;
+        items = null;
+    }
+}

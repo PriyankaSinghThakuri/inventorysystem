@@ -1,0 +1,79 @@
+﻿@using BikeServiceCenter.Data;
+@inject NavigationManager NavManager;
+
+@page "/login"
+
+<div class="login-body" style="text-align:center; box-shadow: 5px 10px 18px #888888; margin: 5% 0% 0% 25%; height: 300px; width: 500px;">
+    <div class="form-login">
+        <form class="text-center" @onsubmit="LoginHandler" style="margin: 30px 0px 0px 60px; align-content: center;">
+            <h1 class="h3 mb-3" style="padding: 30px 0px 15px 0px; text-align: center; font-size: 30px; color: darkslateblue; font-weight: 500;">Please Login</h1>
+            @if (_showDefaultCredentials)
+            {
+                <div class="alert alert-info" role="alert" style="margin: 0px 0px 0px -60px">
+                    Username: <strong>@UserService.SeedUsername</strong><br />
+                    Password: <strong>@UserService.SeedPassword</strong>
+                </div>
+            }
+            <div class="form-floating mb-5">
+                <input type="text" class="form-control username" @bind="_username" placeholder="Username" Style="border: solid 1px #869E9E; margin: 10px 0px 10px 130px; height:35px; width: 250px;" />
+                <label for="floatingInput" Style="margin: -10px 0px 0px 0px;">Username</label>
+            </div>
+            <div class="form-floating mb-3">
+                <input type="password" class="form-control password" @bind="_password" placeholder="Password" Style="border: solid 1px #869E9E; margin: 10px 0px 10px 130px; height:35px; width: 250px;" />
+                <label for="floatingPassword" Style="margin: -10px 0px 0px 0px;">Password</label>
+            </div>
+              @if (!string.IsNullOrEmpty(_errorMessage))
+            {
+                <Alertmessage Type="danger" Message="@_errorMessage" />
+            }
+            <button class="w-15 btn btn-lg btn-primary" type="submit">
+                <span class="oi oi-account-login"></span> Login
+            </button>
+        </form>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter]
+    private GlobalState _globalState { get; set; }
+    private bool _showDefaultCredentials { get; set; }
+    private string _username { get; set; }
+    private string _password { get; set; }
+    private string _errorMessage = "";
+
+    protected override void OnInitialized()
+    {
+        try
+        {
+            var user = UserService.Login(UserService.SeedUsername, UserService.SeedPassword);
+            _showDefaultCredentials = user.HasInitialPassword;
+        }
+        catch
+        {
+           
+        }
+
+        _globalState.CurrentUser = null;
+        _errorMessage = "";
+    }
+
+    private void LoginHandler()
+    {
+        try
+        {
+            _errorMessage = "";
+            _globalState.CurrentUser = UserService.Login(_username, _password);
+            if (_globalState.CurrentUser != null)
+            {
+                NavManager.NavigateTo(_globalState.CurrentUser.HasInitialPassword ? "/changepassword" : "/");
+            }
+        }
+        catch (Exception e)
+        {
+            _errorMessage = e.Message;
+            Console.WriteLine(e);
+        }
+    }
+
+
+}

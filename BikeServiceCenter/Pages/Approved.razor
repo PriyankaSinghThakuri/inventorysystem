@@ -1,0 +1,42 @@
+﻿@page "/approvedLog"
+@using BikeServiceCenter.Data
+
+<h3>Approved tems</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>item name</th>
+            <th>quantity</th>
+            <th>Taken By</th>
+            <th>Approved By</th>
+            <th>Approved Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var approvedItem in _approvedItems)
+        {
+            <tr>
+                <td>@approvedItem.ItemName</td>
+                <td>@approvedItem.Quantity.ToString()</td>
+                <td>@approvedItem.TakerName</td>
+                <td>@approvedItem.ApproverName</td>
+                <td>@approvedItem.TakenOutDate</td>
+            </tr>
+        }
+
+    </tbody>
+  
+</table>
+
+@code {
+    [CascadingParameter]
+    private GlobalState _globalState { get; set; }
+    private List<ApprovedItem> _approvedItems { get; set; }
+
+    protected override void OnInitialized()
+    {
+        _approvedItems = ApprovedItemService.GetAll();
+    }
+
+}
